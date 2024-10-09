@@ -11,13 +11,6 @@
 // requestAnimationFrame(animate);
 
 
-const ball = document.getElementById('ball');
-const container = document.getElementById('container');
-
-console.log(container.offsetHeight, container.offsetWidth);
-
-
-
 // requestAnimationFrame(animate);
 
 const Vec = (xx, yy)=> {
@@ -42,11 +35,36 @@ const Ball = (function() {
   const midPoint = Vec((containerDOMref.offsetWidth / 2) - ballDOMref.offsetWidth / 2, (containerDOMref.offsetHeight / 2) - ballDOMref.offsetHeight / 2);
 
   let direction = Vec(1, 1);
-  let speed = 1;
+  let speed = 2;
   let position = midPoint;
 
-  ballDOMref.style.top = `${midPoint.y}px`;
-  ballDOMref.style.left = `${midPoint.x}px`;
+  ballDOMref.style.top = `${position.y}px`;
+  ballDOMref.style.left = `${position.x}px`;
+
+  function handleCollision(newpos) {
+    if (newpos.y >= (containerDOMref.offsetHeight - ballDOMref.offsetHeight)) {
+      direction = Vec(direction.x, -1 * direction.y);
+      newpos.y = (containerDOMref.offsetHeight - ballDOMref.offsetHeight) - (newpos.y - (containerDOMref.offsetHeight - ballDOMref.offsetHeight));
+    }
+
+    if (newpos.y <= 0) {
+      direction = Vec(direction.x, -1 * direction.y);
+      newpos.y = -1 * newpos.y;
+    }
+
+    if (newpos.x >= (containerDOMref.offsetWidth - ballDOMref.offsetWidth)) {
+      direction = Vec(-1 * direction.x, direction.y);
+      newpos.x = (containerDOMref.offsetWidth - ballDOMref.offsetWidth) - (newpos.x - (containerDOMref.offsetWidth - ballDOMref.offsetWidth));
+    }
+
+    if (newpos.x <= 0) {
+      direction = Vec(-1 * direction.x, direction.y);
+      newpos.x = -1 * newpos.x;
+    }
+
+    return newpos;
+  }
+
 
   function animate(time, lastTime) {
     let diff = 0;
@@ -56,20 +74,19 @@ const Ball = (function() {
 
     let newpos = position.add(direction.scalarM(diff * speed));
   
-    let top = newpos.x;
-    let left = newpos.y;
+    newpos = handleCollision(newpos);
+
+    let top = newpos.y;
+    let left = newpos.x;
   
-    if (top > container.offsetHeight - ball.offsetHeight) top = 0;
-    if (left > container.offsetWidth - ball.offsetWidth) left = 0;
-    
-    ball.style.top = `${top}px`;
-    ball.style.left = `${left}px`;
+    ballDOMref.style.top = `${top}px`;
+    ballDOMref.style.left = `${left}px`;
 
     position = newpos;
-  
+    
     requestAnimationFrame((newTime) => { animate(newTime, time)});
+
   }
 
-  console.log(ballDOMref.style);
   requestAnimationFrame(animate);
 })();
